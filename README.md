@@ -1,5 +1,5 @@
 # Description
-Simple Shell script for incremental replicate ZFS Volumes using their snapshots.
+Simple Shell script for incremental replication ZFS Volumes using their snapshots.
 
 # Usage
 
