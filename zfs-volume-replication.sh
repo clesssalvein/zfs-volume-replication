@@ -39,8 +39,8 @@ echo "Replica latest snap Short name: ${snapReplicaLatestShortName}";
 # if there is NO snaps at original Volume
 if [ ${snapsOriginalQty} -eq 0 ]; then
     # debug
-    echo "--- There is no snaps on Original Replica! ---";
-    echo "--- Creating New First Latest snap on Original Replica... ---";
+    echo "--- There is no snaps on Original Volume! ---";
+    echo "--- Creating New First Latest snap on Original Volume... ---";
 
     # create snap
     zfs snapshot ${zfsVolOriginalFullName}@auto-`date +%Y%m%d-%H%M%S`;
@@ -75,7 +75,7 @@ if [ ${snapsOriginalQty} -ge 1 ]; then
         echo "Latest snap names on both volumes are _EQUAL_!";
 
         # debug
-        echo "--- Creating New Latest snap on Original Replica... ---";
+        echo "--- Creating New Latest snap on Original Volume... ---";
 
         # create snap
         zfs snapshot ${zfsVolOriginalFullName}@auto-`date +%Y%m%d-%H%M%S`;
