@@ -176,7 +176,7 @@ if [ ${snapsOriginalQty} -ge 1 ]; then
         zfs send -Pev -R ${snapOriginalNewLatestFullName} | zfs recv -F ${zfsVolReplicaFullName};
 
         # debug
-        echo "-- Destroying old replicas... ---";
+        echo "-- Destroying old snapshots... ---";
 
         # destroy old snaps, leave only some newest snaps at the both Volumes - original and replica
         zfs list -H -t snapshot -o name -S creation -r ${zfsVolOriginalFullName} \
