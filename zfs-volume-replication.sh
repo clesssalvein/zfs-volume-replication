@@ -8,9 +8,22 @@
 
 
 # VARS
+
+# zfs volumes names
 zfsVolOriginalFullName="d1/vmail";
 zfsVolReplicaFullName="d2/vmail_replica";
+
+# quantity of the last newest snaps, which left after new snapshot created
 zfsSnapsNewestQtyToLeave="7";
+
+# whether you want to remove or to rename and backup zfs-volume-replica with snapshots
+# when something goes wrong and you have to get rid of zfs-volume-replica with its snapshots
+#   "destroy" - destroy zfs-volume-replica with its snapshots in the crash case
+#   "backup" - rename and backup zfs-volume-replica with its snapshots in the crash case
+zfsVolReplicaCrashAction="backup"
+
+
+# SCRIPT START
 
 # get snapshots quantity
 snapsOriginalQty=`zfs list -H -t snapshot -o name -S creation -r ${zfsVolOriginalFullName} \
@@ -53,11 +66,23 @@ if [ ${snapsOriginalQty} -eq 0 ]; then
 
     # if there are some snaps on Replica Volume
     if [ ${snapsReplicaQty} -gt 0 ]; then
-        # debug
-        echo "--- Destroying all snaps on Replica Volume... ---";
+        # "destroy" crash action for zfs-volume-replica
+        if [ ${zfsVolReplicaCrashAction} == "destroy" ]; then
+            # debug
+            echo "--- Destroying all snaps on Replica Volume... ---";
 
-        # destroy all snaps at Replica Volume
-        zfs destroy ${zfsVolReplicaFullName}@%;
+            # destroy all snaps at Replica Volume
+            #zfs destroy ${zfsVolReplicaFullName}@%;
+        fi
+
+        # "backup" crash action for zfs-volume-replica
+        if [ ${zfsVolReplicaCrashAction} == "backup" ]; then
+            # debug
+            echo "--- Renaming and Backuping Replica Volume with all snaps... ---";
+
+            # rename and backup zfs-volume-replica
+            zfs rename ${zfsVolReplicaFullName} ${zfsVolReplicaFullName}_bkup--`date +%Y-%m-%d--%H-%M-%S`;
+        fi
     fi
 
     # debug
@@ -69,10 +94,10 @@ fi
 
 # if there is ONE or MORE snaps at original Volume
 if [ ${snapsOriginalQty} -ge 1 ]; then
-    # if the Latest snaps on Original Volume and Replica Volume have equal names
+    # if the Latest snap on Original Volume and the snap on Replica Volume names are _THE SAME_
     if [[ "${snapOriginalLatestShortName}" == "${snapReplicaLatestShortName}" ]]; then
         # debug
-        echo "Latest snap names on both volumes are _EQUAL_!";
+        echo "Latest snap names on both volumes are _THE SAME_!";
 
         # debug
         echo "--- Creating New Latest snap on Original Volume... ---";
@@ -105,18 +130,30 @@ if [ ${snapsOriginalQty} -ge 1 ]; then
         zfs list -H -t snapshot -o name -S creation -r ${zfsVolReplicaFullName} \
                 | awk -v i=${zfsSnapsNewestQtyToLeave} 'FNR>i {print $0}' | xargs -n 1 zfs destroy;
 
-    # if Qty of snaps at original volume and replica volume are NOT equal
+    # if the Latest snap on Original Volume and the snap on Replica Volume names are _NOT THE SAME_
     else
         # debug
-        echo "--- Latest snap names on both volumes are _NOT EQUAL_! It's necessary to remove all snaps on Replica Volume! ---";
+        echo "--- Latest snap names on both volumes are _NOT THE SAME_! It's necessary to remove all snaps on Replica Volume or to rename Replica Volume! ---";
 
         # if there are some snaps on Replica Volume
         if [ ${snapsReplicaQty} -gt 0 ]; then
-            # debug
-            echo "--- Destroying all snaps on Replica Volume... ---";
+            # "destroy" crash action for zfs-volume-replica
+            if [ ${zfsVolReplicaCrashAction} == "destroy" ]; then
+                # debug
+                echo "--- Destroying all snaps on Replica Volume... ---";
 
-            # destroy all snaps at replica volume
-            zfs destroy ${zfsVolReplicaFullName}@%;
+                # destroy all snaps at Replica Volume
+                #zfs destroy ${zfsVolReplicaFullName}@%;
+            fi
+
+            # "backup" crash action for zfs-volume-replica
+            if [ ${zfsVolReplicaCrashAction} == "backup" ]; then
+                # debug
+                echo "--- Renaming and Backuping Replica Volume with all snaps... ---";
+
+                # rename and backup zfs-volume-replica
+                zfs rename ${zfsVolReplicaFullName} ${zfsVolReplicaFullName}_bkup--`date +%Y-%m-%d--%H-%M-%S`;
+            fi
         fi
 
         # debug
