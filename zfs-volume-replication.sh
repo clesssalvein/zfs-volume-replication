@@ -72,7 +72,7 @@ if [ ${snapsOriginalQty} -eq 0 ]; then
             echo "--- Destroying all snaps on Replica Volume... ---";
 
             # destroy all snaps at Replica Volume
-            #zfs destroy ${zfsVolReplicaFullName}@%;
+            zfs destroy ${zfsVolReplicaFullName}@%;
         fi
 
         # "backup" crash action for zfs-volume-replica
@@ -143,7 +143,7 @@ if [ ${snapsOriginalQty} -ge 1 ]; then
                 echo "--- Destroying all snaps on Replica Volume... ---";
 
                 # destroy all snaps at Replica Volume
-                #zfs destroy ${zfsVolReplicaFullName}@%;
+                zfs destroy ${zfsVolReplicaFullName}@%;
             fi
 
             # "backup" crash action for zfs-volume-replica
